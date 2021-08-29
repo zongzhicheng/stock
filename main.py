@@ -1,4 +1,5 @@
-import baostock as bs
+from script.histroy import *
+from script.common import *
 import pandas as pd
 
 
@@ -19,15 +20,11 @@ class Config:
 
 def run(config):
     # 登陆系统
-    bs.login()
-    """
-    获取历史K线数据
-    
-    """
-    # frequency="d"取日k线adjustflag="3"默认不复权
-    rs = bs.query_history_k_data_plus(config.code, config.fields[0],
-                                      config.start_date, config.end_date,
-                                      frequency="d", adjustflag="3")
+    login()
+    # 获取历史K线数据
+    rs = query_k_data_history(config.code, config.fields[0],
+                              config.start_date, config.end_date,
+                              frequency="d", adjustflag="3")
     # 打印结果集
     data_list = []
     while (rs.error_code == '0') & rs.next():
@@ -35,11 +32,10 @@ def run(config):
         data_list.append(rs.get_row_data())
     result = pd.DataFrame(data_list, columns=rs.fields)
     # 结果集输出到csv文件
-    result.to_csv("history_k_data.csv", encoding="gbk", index=False)
+    # result.to_csv("k_data_history.csv", encoding="gbk", index=False)
     print(result)
-
     # 登出系统
-    bs.logout()
+    logout()
 
 
 if __name__ == '__main__':
