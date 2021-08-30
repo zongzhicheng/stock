@@ -9,6 +9,10 @@ from script.real_time import *
 # print(data)
 
 
-# quotation.market_snapshot(prefix=True)  # prefix 参数指定返回的行情字典中的股票代码 key 是否带 sz/sh 前缀
 while True:
-    print(get_real_time_single_stock('tencent', 'sh000001'))
+    print(get_real_time_single_stock('sina', 'sh000001'))
+
+
+# quotation = easyquotation.use("timekline")
+# data = quotation.real('sh000001', prefix=True)
+# print(data)
