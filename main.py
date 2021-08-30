@@ -1,7 +1,7 @@
 from script.histroy import *
 from script.common import *
 import pandas as pd
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Config:
     def __init__(self):
