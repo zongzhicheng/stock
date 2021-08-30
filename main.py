@@ -5,7 +5,7 @@ import pandas as pd
 
 class Config:
     def __init__(self):
-        self.code = "sh.600000"
+        self.code = "sh.601728"
         self.fields = [
             # 日线指标参数
             "date, code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, isST",
@@ -14,17 +14,15 @@ class Config:
             # 5、15、30、60分钟线指标参数
             "date, time, code, open, high, low, close, volume, amount, adjustflag"
         ]
-        self.start_date = '2020-01-01'
-        self.end_date = '2020-12-31'
+        self.start_date = '2021-08-01'
+        self.end_date = '2021-08-31'
 
 
 def run(config):
     # 登陆系统
     login()
     # 获取历史K线数据
-    rs = query_k_data_history(config.code, config.fields[0],
-                              config.start_date, config.end_date,
-                              frequency="d", adjustflag="3")
+    rs = query_k_data_history(config.code, config.fields[0], config.start_date, config.end_date, "d", "3")
     # 打印结果集
     data_list = []
     while (rs.error_code == '0') & rs.next():
