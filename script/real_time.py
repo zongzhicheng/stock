@@ -1,4 +1,5 @@
 import easyquotation
+import datetime
 
 
 def get_real_time_single_stock(source, code):
@@ -21,3 +22,19 @@ def get_real_time_multiple_stock(source, code_arr):
     """
     quotation = easyquotation.use(source)
     return quotation.stocks(code_arr, prefix=True)
+
+
+def show_real_time_single_stock(source, code, fields):
+    data_list = []
+    result = get_real_time_single_stock(source, code)
+    for i in fields:
+        if isinstance(result[code][i], datetime.datetime):
+            data_list.append(result[code][i].strftime('%Y-%m-%d %H:%M:%S'))
+        else:
+            data_list.append(result[code][i])
+    return data_list
+
+
+if __name__ == '__main__':
+    fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
+    print(show_real_time_single_stock('tencent', 'sh000001', fields))

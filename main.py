@@ -1,21 +1,8 @@
 from script.histroy import *
 from script.common import *
 import pandas as pd
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-class Config:
-    def __init__(self):
-        self.code = "sh.601728"
-        self.fields = [
-            # 日线指标参数
-            "date, code, open, high, low, close, preclose, volume, amount, adjustflag, turn, tradestatus, pctChg, isST",
-            # 周、月线指标参数
-            "date, code, open, high, low, close, volume, amount, adjustflag, turn, pctChg",
-            # 5、15、30、60分钟线指标参数
-            "date, time, code, open, high, low, close, volume, amount, adjustflag"
-        ]
-        self.start_date = '2021-08-01'
-        self.end_date = '2021-08-31'
+from qt.window import *
+import sys
 
 
 def run(config):
@@ -37,5 +24,6 @@ def run(config):
 
 
 if __name__ == '__main__':
-    cfg = Config()
-    run(cfg)
+    app = QApplication(sys.argv)
+    ex = ui_Form()
+    sys.exit(app.exec_())
