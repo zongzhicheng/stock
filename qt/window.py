@@ -55,14 +55,8 @@ class ui_Form(QWidget):
         self.table_widget1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_widget1.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        newItem = ["上证指数", "3528.15", "3522.16", "3535.07", "3539.49", "3512.99", "2021-08-30 15:59:09", "5.99", "0.17"]
-        for i in range(len(newItem)):
-            # print(i)
-            item = QTableWidgetItem(newItem[i])
-            self.table_widget1.setItem(i - 1, 1, item)
-
     def btnClicked(self):
-        fields = ["name", "now", "close", "open", "high", "datetime", "low", "涨跌", "涨跌(%)"]
+        fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
         if self.push_button1.isChecked():
             # 已被单击
             self.push_button1.setCheckable(False)
@@ -71,7 +65,6 @@ class ui_Form(QWidget):
             # 未被单击
             self.push_button1.setCheckable(True)
             self.push_button1.toggle()  # 切换按钮状态
-
             result = show_real_time_single_stock('tencent', self.line_edit1.text().strip(), fields)
             print(result)
             for i in range(len(result)):
