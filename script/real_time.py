@@ -27,16 +27,29 @@ def get_real_time_multiple_stock(source, code_arr):
 def show_real_time_single_stock(source, code, fields):
     data_list = []
     result = get_real_time_single_stock(source, code)
-    for i in fields:
-        if isinstance(result[code][i], datetime.datetime):
-            data_list.append(result[code][i].strftime('%Y-%m-%d %H:%M:%S'))
+    for field in fields:
+        if isinstance(result[code][field], datetime.datetime):
+            data_list.append(result[code][field].strftime('%Y-%m-%d %H:%M:%S'))
         else:
-            data_list.append(result[code][i])
+            data_list.append(result[code][field])
     return data_list
 
 
 def alert_real_time_single_field(source, code, field, threshold, rule="low"):
+    """
+    判断实时数据filed是否大于或小于某阈值
+    :param source: 
+    :param code: 
+    :param field: 
+    :param threshold: 
+    :param rule: 
+    :return: 
+    """""
     result = get_real_time_single_stock(source, code)
+    if rule not in ["low", "high"]:
+        return "rule must 'low' or 'high'"
+    if field not in result[code]:
+        return "filed must exist"
     if (rule == "low" and float(result[code][field]) < threshold) or (
             rule == "high" and float(result[code][field]) > threshold):
         flag = True
@@ -46,5 +59,6 @@ def alert_real_time_single_field(source, code, field, threshold, rule="low"):
 
 
 if __name__ == '__main__':
-    field = "now"
-    print(alert_real_time_single_field('tencent', 'sh000001', field, 1000000, "low"))
+    fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
+    print(show_real_time_single_stock('tencent', 'sh000001', fields))
+    print(alert_real_time_single_field('tencent', 'sh000001', "涨跌(%)", 5, "low"))
