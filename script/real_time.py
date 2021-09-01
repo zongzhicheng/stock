@@ -35,6 +35,16 @@ def show_real_time_single_stock(source, code, fields):
     return data_list
 
 
+def alert_real_time_single_field(source, code, field, threshold, rule="low"):
+    result = get_real_time_single_stock(source, code)
+    if (rule == "low" and float(result[code][field]) < threshold) or (
+            rule == "high" and float(result[code][field]) > threshold):
+        flag = True
+    else:
+        flag = False
+    return flag
+
+
 if __name__ == '__main__':
-    fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
-    print(show_real_time_single_stock('tencent', 'sh000001', fields))
+    field = "now"
+    print(alert_real_time_single_field('tencent', 'sh000001', field, 1000000, "low"))
