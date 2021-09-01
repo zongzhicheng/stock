@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from script.real_time import *
 import time
@@ -37,7 +37,6 @@ class ui_Form(QWidget):
         # 按钮初始化
         self.push_button1 = QPushButton('查询实时数据', self)
         self.push_button1.move(160, 25)
-        self.push_button1.setCheckable(False)
         self.push_button1.clicked.connect(self.btnClicked)
 
     def initTableWidget(self):
@@ -56,21 +55,24 @@ class ui_Form(QWidget):
         self.table_widget1.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def btnClicked(self):
-        fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
-        if self.push_button1.isChecked():
+        if self.push_button1.isCheckable():
             # 已被单击
             self.push_button1.setCheckable(False)
             self.push_button1.toggle()  # 切换按钮状态
+            # todo
         else:
             # 未被单击
             self.push_button1.setCheckable(True)
             self.push_button1.toggle()  # 切换按钮状态
-            result = show_real_time_single_stock('tencent', self.line_edit1.text().strip(), fields)
-            print(result)
-            for i in range(len(result)):
-                # print(i)
-                item = QTableWidgetItem(str(result[i]))
-                self.table_widget1.setItem(i - 1, 1, item)
+            self.thread = QThread()
+            self.worker = Worker(self.line_edit1.text().strip())
+            self.worker.moveToThread(self.thread)
+            self.thread.started.connect(self.worker.run)
+            self.worker.sinOut.connect(self.tableWidget1SetItem)
+            self.thread.start()
+
+    def tableWidget1SetItem(self, var):
+        self.table_widget1.setItem(var[0], var[1], var[2])
 
     def center(self):
         """
@@ -98,3 +100,26 @@ class ui_Form(QWidget):
             event.accept()
         else:
             event.ignore()
+
+
+class Worker(QObject):
+    sinOut = pyqtSignal(tuple)
+    fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
+
+    def __init__(self, text, parent=None):
+        super(Worker, self).__init__(parent)
+        self.text = text
+
+    def run(self):
+        while True:
+            result = show_real_time_single_stock('tencent', self.text, self.fields)
+            print(result)
+            for i in range(len(result)):
+                # print(i)
+                item = QTableWidgetItem(str(result[i]))
+                # self.table_widget1.setItem(i - 1, 1, item)
+                var = (i - 1, 1, item)
+                # 发射信号
+                self.sinOut.emit(var)
+            # 线程休眠1秒
+            time.sleep(1)
