@@ -28,10 +28,11 @@ def show_real_time_single_stock(source, code, fields):
     data_list = []
     result = get_real_time_single_stock(source, code)
     for field in fields:
-        if isinstance(result[code][field], datetime.datetime):
-            data_list.append(result[code][field].strftime('%Y-%m-%d %H:%M:%S'))
-        else:
-            data_list.append(result[code][field])
+        if code in result:
+            if isinstance(result[code][field], datetime.datetime):
+                data_list.append(result[code][field].strftime('%Y-%m-%d %H:%M:%S'))
+            else:
+                data_list.append(result[code][field])
     return data_list
 
 

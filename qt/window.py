@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from script.real_time import *
-import time
+from qt.thread import *
 
 
 class Window(QMainWindow):
@@ -84,21 +84,38 @@ class Window(QMainWindow):
     """
 
     def __btn1Clicked(self):
+        if self.line_edit1.text().strip() == '':
+            QMessageBox.question(self, ' ', "请填写股票代码", QMessageBox.Yes, QMessageBox.Yes)
+            return
         self.flag = False
         self.push_button1.setEnabled(False)
-        self.thread = Thread(self.line_edit1.text().strip())
-        self.thread.sinOut.connect(self.tableWidget1SetItem)
-        self.thread.start()
+        self.thread1 = Thread1(self.line_edit1.text().strip())
+        self.thread1.sinOut.connect(self.sinOutMethod)
+        self.thread1.errorOut.connect(self.errorOutMethod)
+        self.thread1.start()
 
     def __btn2Clicked(self):
-        self.thread.cancel()
+        self.thread1.cancel()
         self.push_button1.setEnabled(True)
         self.line_edit1.clear()
         self.table_widget1.clearContents()
 
-
-    def tableWidget1SetItem(self, var):
+    def sinOutMethod(self, var):
+        """
+        sinOut触发
+        :param var:
+        :return:
+        """
         self.table_widget1.setItem(var[0], var[1], var[2])
+
+    def errorOutMethod(self, str):
+        QMessageBox.question(self, ' ', str, QMessageBox.Yes, QMessageBox.Yes)
+        self.line_edit1.clear()
+        self.push_button1.setEnabled(True)
+
+    """
+    退出确认
+    """
 
     def closeEvent(self, event):
         """
@@ -106,43 +123,9 @@ class Window(QMainWindow):
         :param event:
         :return:
         """
-        reply = QMessageBox.question(self, ' ',
-                                     "Are you sure to quit?", QMessageBox.Yes |
-                                     QMessageBox.No, QMessageBox.No)
+        reply = QMessageBox.question(self, ' ', "Are you sure to quit?", QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
         if reply == QMessageBox.Yes:
             event.accept()
         else:
             event.ignore()
-
-
-class Thread(QThread):
-    sinOut = pyqtSignal(tuple)
-    fields = ["name", "now", "close", "open", "high", "low", "datetime", "涨跌", "涨跌(%)"]
-
-    # 构造函数
-    def __init__(self, text):
-        super(Thread, self).__init__()
-        self.text = text
-        self.isCancel = False
-        self.mutex = QMutex()
-
-    def cancel(self):
-        self.isCancel = True
-
-    def run(self):
-        while True:
-            if self.isCancel:
-                break
-            # 线程锁on
-            self.mutex.lock()
-            result = show_real_time_single_stock('tencent', self.text, self.fields)
-            print(result)
-            for i in range(len(result)):
-                # print(i)
-                item = QTableWidgetItem(str(result[i]))
-                var = (i - 1, 1, item)
-                # 发射信号
-                self.sinOut.emit(var)
-            self.msleep(1500)
-            # 线程锁off
-            self.mutex.unlock()
