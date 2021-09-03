@@ -51,8 +51,8 @@ def alert_real_time_single_field(source, code, field, threshold, rule="low"):
         return "codeError"
     if field not in result[code]:
         return "fieldError"
-    if (rule == "low" and float(result[code][field]) < threshold) or (
-            rule == "high" and float(result[code][field]) > threshold):
+    if (rule == "low" and float(result[code][field]) < float(threshold)) or (
+            rule == "high" and float(result[code][field]) > float(threshold)):
         flag = True
     else:
         flag = False

@@ -74,6 +74,7 @@ class Window(QMainWindow):
         self.push_button3 = QPushButton('盯盘', self)
         self.push_button3.clicked.connect(self.__btn3Clicked)
         self.push_button4 = QPushButton('清除', self)
+        self.push_button4.setEnabled(False)
         self.push_button4.clicked.connect(self.__btn4Clicked)
 
     def initTableWidget(self):
@@ -142,14 +143,22 @@ class Window(QMainWindow):
             self.line_edit4.clear()
             return
         self.push_button3.setEnabled(False)
+        self.push_button4.setEnabled(True)
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_start.mp3")))
         self.player.play()
+        self.thread2 = Thread2(self.line_edit2.text().strip(),
+                               self.line_edit3.text().strip(),
+                               self.line_edit4.text().strip())
+        self.thread2.sinOut.connect(self.thread2SinOutMethod)
+        self.thread2.errorOut.connect(self.thread2ErrorOutMethod)
+        self.thread2.start()
 
     def __btn4Clicked(self):
         """
         清除
         :return:
         """
+        self.thread2.cancel()
         self.push_button3.setEnabled(True)
         self.line_edit2.clear()
         self.line_edit3.clear()
@@ -168,6 +177,18 @@ class Window(QMainWindow):
         QMessageBox.question(self, ' ', str, QMessageBox.Yes, QMessageBox.Yes)
         self.line_edit1.clear()
         self.push_button1.setEnabled(True)
+
+    def thread2SinOutMethod(self):
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_reach_threshold.mp3")))
+        self.player.play()
+
+    def thread2ErrorOutMethod(self, str):
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_fail.mp3")))
+        self.player.play()
+        QMessageBox.question(self, ' ', str, QMessageBox.Yes, QMessageBox.Yes)
+        self.line_edit2.clear()
+        self.line_edit3.clear()
+        self.push_button3.setEnabled(True)
 
     """
     退出确认
