@@ -25,5 +25,6 @@ def run(config):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = ui_Form()
+    ex = Window()
+    ex.show()
     sys.exit(app.exec())
