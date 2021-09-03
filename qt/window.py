@@ -1,9 +1,7 @@
-from PyQt5.QtCore import *
-from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QSound
-from PyQt5.QtWidgets import *
-from script.real_time import *
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from qt.thread import *
 from script.general import *
+import time
 import os
 
 
@@ -14,6 +12,8 @@ class Window(QMainWindow):
         self.initUI()
         self.player = QMediaPlayer()
         self.player.setVolume(100.0)
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\welcome.mp3")))
+        self.player.play()
 
     def initUI(self):
         # 窗口初始化
@@ -202,7 +202,11 @@ class Window(QMainWindow):
         """
         reply = QMessageBox.question(self, ' ', "Are you sure to quit?", QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
+
         if reply == QMessageBox.Yes:
+            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\goodbye.mp3")))
+            self.player.play()
+            QThread().msleep(2000)
             event.accept()
         else:
             event.ignore()
