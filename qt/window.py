@@ -1,7 +1,10 @@
 from PyQt5.QtCore import *
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QSound
 from PyQt5.QtWidgets import *
 from script.real_time import *
 from qt.thread import *
+from script.general import *
+import os
 
 
 class Window(QMainWindow):
@@ -9,6 +12,8 @@ class Window(QMainWindow):
         super().__init__(parent)
         self.centralWidget = QWidget()
         self.initUI()
+        self.player = QMediaPlayer()
+        self.player.setVolume(100.0)
 
     def initUI(self):
         # 窗口初始化
@@ -37,6 +42,7 @@ class Window(QMainWindow):
         self.gridLayout.addWidget(self.label6, 3, 4)
         self.gridLayout.addWidget(self.line_edit4, 3, 5)
         self.gridLayout.addWidget(self.push_button3, 1, 6)
+        self.gridLayout.addWidget(self.push_button4, 2, 6)
         self.centralWidget.setLayout(self.gridLayout)
 
     def initLabel(self):
@@ -63,8 +69,12 @@ class Window(QMainWindow):
         self.push_button1 = QPushButton('查询实时数据', self)
         self.push_button1.clicked.connect(self.__btn1Clicked)
         self.push_button2 = QPushButton('清除', self)
+        self.push_button2.setEnabled(False)
         self.push_button2.clicked.connect(self.__btn2Clicked)
         self.push_button3 = QPushButton('盯盘', self)
+        self.push_button3.clicked.connect(self.__btn3Clicked)
+        self.push_button4 = QPushButton('清除', self)
+        self.push_button4.clicked.connect(self.__btn4Clicked)
 
     def initTableWidget(self):
         # 表格初始化
@@ -84,23 +94,69 @@ class Window(QMainWindow):
     """
 
     def __btn1Clicked(self):
+        """
+        查询实时数据
+        :return:
+        """
         if self.line_edit1.text().strip() == '':
             QMessageBox.question(self, ' ', "请填写股票代码", QMessageBox.Yes, QMessageBox.Yes)
             return
-        self.flag = False
         self.push_button1.setEnabled(False)
+        self.push_button2.setEnabled(True)
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_real_time_start.mp3")))
+        self.player.play()
         self.thread1 = Thread1(self.line_edit1.text().strip())
-        self.thread1.sinOut.connect(self.sinOutMethod)
-        self.thread1.errorOut.connect(self.errorOutMethod)
+        self.thread1.sinOut.connect(self.thread1SinOutMethod)
+        self.thread1.errorOut.connect(self.thread1ErrorOutMethod)
         self.thread1.start()
 
     def __btn2Clicked(self):
+        """
+        清除
+        :return:
+        """
         self.thread1.cancel()
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_real_time_stop.mp3")))
+        self.player.play()
         self.push_button1.setEnabled(True)
         self.line_edit1.clear()
         self.table_widget1.clearContents()
 
-    def sinOutMethod(self, var):
+    def __btn3Clicked(self):
+        """
+        盯盘
+        :return:
+        """
+        if self.line_edit2.text().strip() == '':
+            QMessageBox.question(self, ' ', "请填写股票代码", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        if self.line_edit3.text().strip() == '':
+            QMessageBox.question(self, ' ', "请填写价位", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        if not is_number(self.line_edit3.text().strip()):
+            QMessageBox.question(self, ' ', "价位栏请填写数字", QMessageBox.Yes, QMessageBox.Yes)
+            self.line_edit3.clear()
+            return
+        if self.line_edit4.text().strip() == '' or self.line_edit4.text().strip() not in ['low', 'high']:
+            QMessageBox.question(self, ' ', "请填写'low'或者'high'", QMessageBox.Yes, QMessageBox.Yes)
+            self.line_edit4.clear()
+            return
+        self.push_button3.setEnabled(False)
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_start.mp3")))
+        self.player.play()
+
+    def __btn4Clicked(self):
+        """
+        清除
+        :return:
+        """
+        self.push_button3.setEnabled(True)
+        self.line_edit2.clear()
+        self.line_edit3.clear()
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_stop.mp3")))
+        self.player.play()
+
+    def thread1SinOutMethod(self, var):
         """
         sinOut触发
         :param var:
@@ -108,7 +164,7 @@ class Window(QMainWindow):
         """
         self.table_widget1.setItem(var[0], var[1], var[2])
 
-    def errorOutMethod(self, str):
+    def thread1ErrorOutMethod(self, str):
         QMessageBox.question(self, ' ', str, QMessageBox.Yes, QMessageBox.Yes)
         self.line_edit1.clear()
         self.push_button1.setEnabled(True)

@@ -47,10 +47,10 @@ def alert_real_time_single_field(source, code, field, threshold, rule="low"):
     :return: 
     """""
     result = get_real_time_single_stock(source, code)
-    if rule not in ["low", "high"]:
-        return "rule must 'low' or 'high'"
+    if code not in result:
+        return "codeError"
     if field not in result[code]:
-        return "filed must exist"
+        return "fieldError"
     if (rule == "low" and float(result[code][field]) < threshold) or (
             rule == "high" and float(result[code][field]) > threshold):
         flag = True
