@@ -1,6 +1,7 @@
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from qt.thread import *
 from script.general import *
+from PyQt5.QtCore import *
 import time
 import os
 
@@ -104,6 +105,7 @@ class Window(QMainWindow):
             return
         self.push_button1.setEnabled(False)
         self.push_button2.setEnabled(True)
+        self.line_edit1.setReadOnly(True)
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_real_time_start.mp3")))
         self.player.play()
         self.thread1 = Thread1(self.line_edit1.text().strip())
@@ -120,6 +122,7 @@ class Window(QMainWindow):
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_real_time_stop.mp3")))
         self.player.play()
         self.push_button1.setEnabled(True)
+        self.line_edit1.setReadOnly(False)
         self.line_edit1.clear()
         self.table_widget1.clearContents()
 
@@ -144,6 +147,9 @@ class Window(QMainWindow):
             return
         self.push_button3.setEnabled(False)
         self.push_button4.setEnabled(True)
+        self.line_edit2.setReadOnly(True)
+        self.line_edit3.setReadOnly(True)
+        self.line_edit4.setReadOnly(True)
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_start.mp3")))
         self.player.play()
         self.thread2 = Thread2(self.line_edit2.text().strip(),
@@ -162,6 +168,9 @@ class Window(QMainWindow):
         self.push_button3.setEnabled(True)
         self.line_edit2.clear()
         self.line_edit3.clear()
+        self.line_edit2.setReadOnly(False)
+        self.line_edit3.setReadOnly(False)
+        self.line_edit4.setReadOnly(False)
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "\qt\mp3\stock_auto_real_time_stop.mp3")))
         self.player.play()
 
