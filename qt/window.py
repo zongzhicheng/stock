@@ -18,7 +18,7 @@ class Window(QMainWindow):
 
     def initUI(self):
         # 窗口初始化
-        self.resize(1024, 768)
+        self.resize(1280, 960)
         self.setWindowTitle('量化交易平台v1.0')
         self.setCentralWidget(self.centralWidget)
 
@@ -29,21 +29,27 @@ class Window(QMainWindow):
 
         # 控件布局
         self.gridLayout = QGridLayout(self.centralWidget)
+        # 第一行
         self.gridLayout.addWidget(self.label1, 0, 0)
+        self.gridLayout.addWidget(self.label3, 0, 4)
+        # 第二行
         self.gridLayout.addWidget(self.label2, 1, 1)
         self.gridLayout.addWidget(self.line_edit1, 1, 2)
         self.gridLayout.addWidget(self.push_button1, 1, 3)
-        self.gridLayout.addWidget(self.push_button2, 2, 3)
-        self.gridLayout.addWidget(self.table_widget1, 2, 1, 40, 2)
-        self.gridLayout.addWidget(self.label3, 0, 4)
         self.gridLayout.addWidget(self.label4, 1, 4)
         self.gridLayout.addWidget(self.line_edit2, 1, 5)
+        self.gridLayout.addWidget(self.push_button3, 1, 6)
+        # 第三行
+        self.gridLayout.addWidget(self.table_widget1, 2, 1, 40, 2)
+        self.gridLayout.addWidget(self.push_button2, 2, 3)
         self.gridLayout.addWidget(self.label5, 2, 4)
         self.gridLayout.addWidget(self.line_edit3, 2, 5)
+        self.gridLayout.addWidget(self.push_button4, 2, 6)
+        # 第四行
         self.gridLayout.addWidget(self.label6, 3, 4)
         self.gridLayout.addWidget(self.line_edit4, 3, 5)
-        self.gridLayout.addWidget(self.push_button3, 1, 6)
-        self.gridLayout.addWidget(self.push_button4, 2, 6)
+        # 第5行
+        self.gridLayout.addWidget(self.label7, 4, 3)
         self.centralWidget.setLayout(self.gridLayout)
 
     def initLabel(self):
@@ -54,6 +60,7 @@ class Window(QMainWindow):
         self.label4 = QLabel('股票代码：', self)
         self.label5 = QLabel('价位：', self)
         self.label6 = QLabel('low or high', self)
+        self.label7 = QLabel('K线图', self)
 
     def initLineEdit(self):
         # 文本框初始化
