@@ -12,7 +12,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, 
 
 n = 30
 LR = 0.001
-EPOCH = 50
+EPOCH = 80
 batch_size = 40
 hidden_size = 128
 train_end = -600
@@ -91,6 +91,7 @@ def timeseries_evaluation_metrics_func(y_true, y_pred):
     logger.info(f'MAPE : {mean_absolute_percentage_error(y_true, y_pred):.4f}')
     logger.info(f'DA : {DA(y_true, y_pred):.4f}')
     logger.info(f'R2 : {r2_score(y_true, y_pred):.4f}', end='\n\n')
+    return DA(y_true, y_pred), r2_score(y_true, y_pred)
 
 
 if __name__ == '__main__':
@@ -100,83 +101,91 @@ if __name__ == '__main__':
     # df = df.dropna()
     # df = df.iloc[::-1]
     # df.to_csv('sh000300.csv')
+    da = []
+    r2 = []
+    for i in range(10):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        pd.plotting.register_matplotlib_converters()
 
-    pd.plotting.register_matplotlib_converters()
+        # 获取训练数据、原始数据、索引等信息
+        df, df_all, df_index = readData('high', n=n, train_end=train_end)
 
-    # 获取训练数据、原始数据、索引等信息
-    df, df_all, df_index = readData('high', n=n, train_end=train_end)
+        # 可视化原最高价数据
+        df_all = np.array(df_all.tolist())
+        # plt.plot(df_index, df_all, label='real-data')
+        # plt.legend(loc='upper right')
+        # plt.show()
 
-    # 可视化原最高价数据
-    df_all = np.array(df_all.tolist())
-    # plt.plot(df_index, df_all, label='real-data')
-    # plt.legend(loc='upper right')
-    # plt.show()
+        # 对数据进行预处理，规范化及转换为Tensor
+        df_numpy = np.array(df)
+        df_numpy_mean = np.mean(df_numpy)
+        df_numpy_std = np.std(df_numpy)
+        df_numpy = (df_numpy - df_numpy_mean) / df_numpy_std
+        df_tensor = torch.Tensor(df_numpy)
 
-    # 对数据进行预处理，规范化及转换为Tensor
-    df_numpy = np.array(df)
-    df_numpy_mean = np.mean(df_numpy)
-    df_numpy_std = np.std(df_numpy)
-    df_numpy = (df_numpy - df_numpy_mean) / df_numpy_std
-    df_tensor = torch.Tensor(df_numpy)
+        trainset = mytrainset(df_tensor)
+        trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=False)
 
-    trainset = mytrainset(df_tensor)
-    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=False)
+        # 记录损失值，并用tensorboardx在web上展示
+        # writer = SummaryWriter(log_dir='logs')
 
-    # 记录损失值，并用tensorboardx在web上展示
-    # writer = SummaryWriter(log_dir='logs')
+        rnn = RNN(n, hidden_size).to(device)
+        optimizer = torch.optim.Adam(rnn.parameters(), lr=LR)
+        loss_func = nn.MSELoss()
+        loss_list = []
+        for step in range(EPOCH):
+            for tx, ty in trainloader:
+                tx = tx.to(device)
+                ty = ty.to(device)
+                # 在第1个维度上添加一个维度为1的维度，形状变为[batch,seq_len,input_size]
+                output = rnn(torch.unsqueeze(tx, dim=1)).to(device)
+                loss = loss_func(torch.squeeze(output), ty)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            # writer.add_scalar('sh300_loss', loss, step)
+            # GPU tensor 转换成 Numpy 变量的时候，需要先将 tensor 转换到 CPU
+            loss_list.append(loss.data.cpu().numpy())
+            logger.info("epoch {} : batch_size: {} loss: {:.4f}".format(step, batch_size, loss))
 
-    rnn = RNN(n, hidden_size).to(device)
-    optimizer = torch.optim.Adam(rnn.parameters(), lr=LR)
-    loss_func = nn.MSELoss()
-    loss_list = []
-    for step in range(EPOCH):
-        for tx, ty in trainloader:
-            tx = tx.to(device)
-            ty = ty.to(device)
-            # 在第1个维度上添加一个维度为1的维度，形状变为[batch,seq_len,input_size]
-            output = rnn(torch.unsqueeze(tx, dim=1)).to(device)
-            loss = loss_func(torch.squeeze(output), ty)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-        # writer.add_scalar('sh300_loss', loss, step)
-        loss_list.append(loss)
-        logger.info("epoch {} : batch_size: {} loss: {:.4f}".format(step, batch_size, loss))
+        generate_data_train = []
+        generate_data_test = []
 
-    generate_data_train = []
-    generate_data_test = []
+        test_index = len(df_all) + train_end
 
-    test_index = len(df_all) + train_end
+        df_all_normal = (df_all - df_numpy_mean) / df_numpy_std
+        df_all_normal_tensor = torch.Tensor(df_all_normal)
+        for i in range(n, len(df_all)):
+            x = df_all_normal_tensor[i - n:i].to(device)
+            # rnn的输入必须是3维，故需添加两个1维的维度，最后成为[1,1,input_size]
+            x = torch.unsqueeze(torch.unsqueeze(x, dim=0), dim=0)
 
-    df_all_normal = (df_all - df_numpy_mean) / df_numpy_std
-    df_all_normal_tensor = torch.Tensor(df_all_normal)
-    for i in range(n, len(df_all)):
-        x = df_all_normal_tensor[i - n:i].to(device)
-        # rnn的输入必须是3维，故需添加两个1维的维度，最后成为[1,1,input_size]
-        x = torch.unsqueeze(torch.unsqueeze(x, dim=0), dim=0)
+            y = rnn(x).to(device)
+            if i < test_index:
+                generate_data_train.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
+            else:
+                generate_data_test.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
+        # plt.plot(df_index[n:train_end], generate_data_train, label='generate_train')
+        # plt.plot(df_index[train_end:], generate_data_test, label='generate_test')
+        # plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
+        # plt.legend()
+        # plt.show()
 
-        y = rnn(x).to(device)
-        if i < test_index:
-            generate_data_train.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
-        else:
-            generate_data_test.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
-    # plt.plot(df_index[n:train_end], generate_data_train, label='generate_train')
-    # plt.plot(df_index[train_end:], generate_data_test, label='generate_test')
-    # plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
-    # plt.legend()
-    # plt.show()
+        # plt.clf()
+        # plt.plot(df_index[train_end:-500], df_all[train_end:-500], label='real-data')
+        # plt.plot(df_index[train_end:-500], generate_data_test[train_end:-500], label='generate_test')
+        # plt.legend()
+        # plt.show()
+        logger.info("----------------------------------------------------------------------")
+        _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:-500], generate_data_test[train_end:-500])
 
-    # plt.clf()
-    plt.plot(df_index[train_end:-500], df_all[train_end:-500], label='real-data')
-    plt.plot(df_index[train_end:-500], generate_data_test[train_end:-500], label='generate_test')
-    plt.legend()
-    plt.show()
-    logger.info("----------------------------------------------------------------------")
-    timeseries_evaluation_metrics_func(df_all[train_end:-500], generate_data_test[train_end:-500])
+        plt.clf()
+        plt.plot(range(EPOCH), loss_list, label='loss')
+        plt.legend()
+        plt.show()
+        da.append(_da)
+        r2.append(_r2)
 
-    plt.clf()
-    plt.plot(range(EPOCH), loss_list, label='loss')
-    plt.legend()
-    plt.show()
+    logger.debug("da 均值：{:.4f}".format(np.mean(da)))
+    logger.debug("r2 均值：{:.4f}".format(np.mean(r2)))
