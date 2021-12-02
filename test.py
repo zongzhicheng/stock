@@ -10,13 +10,13 @@ from torch.utils.data import Dataset, DataLoader
 from loguru import logger
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error, r2_score
 
-n = 7
-LR = 0.0002
+n = 14
+LR = 0.0005
 EPOCH = 200
-batch_size = 40
+batch_size = 100
 hidden_size = 128
 train_end = -300
-csv_name = "600519"
+csv_name = "000300"
 
 
 class RNN(nn.Module):
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # df.to_csv(csv_name + ".csv")
     da = []
     r2 = []
-    for k in range(1):
+    for k in range(50):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         pd.plotting.register_matplotlib_converters()
@@ -177,17 +177,17 @@ if __name__ == '__main__':
         # plt.show()
 
         # plt.clf()
-        plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
-        plt.plot(df_index[train_end:], generate_data_test[train_end:], label='generate_test')
-        plt.legend()
-        plt.show()
+        # plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
+        # plt.plot(df_index[train_end:], generate_data_test[train_end:], label='generate_test')
+        # plt.legend()
+        # plt.show()
         logger.info("----------------------------------------------------------------------")
         _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:], generate_data_test[train_end:])
 
-        plt.clf()
-        plt.plot(range(EPOCH), loss_list, label='loss')
-        plt.legend()
-        plt.show()
+        # plt.clf()
+        # plt.plot(range(EPOCH), loss_list, label='loss')
+        # plt.legend()
+        # plt.show()
         da.append(_da)
         r2.append(_r2)
 
