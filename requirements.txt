@@ -1,5 +1,13 @@
+# pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+
 tushare==1.2.64
-pandas==1.3.2
-baostock==0.8.8
 easyquotation==0.7.4
-PyQt5==5.15.4
+pandas==1.3.2
+# torch==1.7.0+cu110
+# torch基于本机的cuda版本自行下载gpu版和cpu版
+# 可以直接从这里下载 https://download.pytorch.org/whl/torch_stable.html 然后手动安装
+matplotlib==3.5.0
+loguru==0.5.3
+numpy==1.21.2
+PyQt5==5.15.6
+scikit_learn==1.0.1

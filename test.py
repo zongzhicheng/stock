@@ -11,9 +11,9 @@ from loguru import logger
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error, r2_score
 
 n = 30
-LR = 0.001
-EPOCH = 80
-batch_size = 40
+LR = 0.0005
+EPOCH = 400
+batch_size = 20
 hidden_size = 128
 train_end = -600
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     # df.to_csv('sh000300.csv')
     da = []
     r2 = []
-    for i in range(10):
+    for k in range(2):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         pd.plotting.register_matplotlib_converters()
@@ -135,6 +135,7 @@ if __name__ == '__main__':
         loss_func = nn.MSELoss()
         loss_list = []
         for step in range(EPOCH):
+            loss_batch = []
             for tx, ty in trainloader:
                 tx = tx.to(device)
                 ty = ty.to(device)
@@ -144,10 +145,11 @@ if __name__ == '__main__':
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                loss_batch.append(loss.data.cpu().numpy())
             # writer.add_scalar('sh300_loss', loss, step)
             # GPU tensor 转换成 Numpy 变量的时候，需要先将 tensor 转换到 CPU
-            loss_list.append(loss.data.cpu().numpy())
-            logger.info("epoch {} : batch_size: {} loss: {:.4f}".format(step, batch_size, loss))
+            loss_list.append(np.mean(loss_batch))
+            logger.info("epoch {} : batch_size: {} loss: {:.4f}".format(step, batch_size, np.mean(loss_batch)))
 
         generate_data_train = []
         generate_data_test = []
