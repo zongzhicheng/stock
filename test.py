@@ -12,8 +12,8 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, 
 
 n = 30
 LR = 0.0005
-EPOCH = 400
-batch_size = 20
+EPOCH = 200
+batch_size = 80
 hidden_size = 128
 train_end = -600
 
@@ -24,7 +24,7 @@ class RNN(nn.Module):
         self.rnn = nn.LSTM(
             input_size=input_size,
             hidden_size=hidden_size,
-            num_layers=1,
+            num_layers=2,
             batch_first=True
         )
         self.out = nn.Sequential(nn.Linear(hidden_size, 1))
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     # df.to_csv('sh000300.csv')
     da = []
     r2 = []
-    for k in range(2):
+    for k in range(50):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         pd.plotting.register_matplotlib_converters()
