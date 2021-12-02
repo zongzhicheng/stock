@@ -10,12 +10,13 @@ from torch.utils.data import Dataset, DataLoader
 from loguru import logger
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error, r2_score
 
-n = 30
-LR = 0.0005
+n = 7
+LR = 0.0002
 EPOCH = 200
-batch_size = 80
+batch_size = 40
 hidden_size = 128
-train_end = -600
+train_end = -300
+csv_name = "600519"
 
 
 class RNN(nn.Module):
@@ -24,7 +25,7 @@ class RNN(nn.Module):
         self.rnn = nn.LSTM(
             input_size=input_size,
             hidden_size=hidden_size,
-            num_layers=2,
+            num_layers=1,
             batch_first=True
         )
         self.out = nn.Sequential(nn.Linear(hidden_size, 1))
@@ -63,7 +64,7 @@ def generate_data_by_n_days(series, n, index=False):
 
 # 参数n与上相同。train_end表示的是后面多少个数据作为测试集。
 def readData(column='high', n=30, all_too=True, index=False, train_end=-500):
-    df = pd.read_csv("sh000300.csv", index_col=0)
+    df = pd.read_csv(csv_name + ".csv", index_col=0)
     # 以日期为索引
     df.index = list(map(lambda x: datetime.datetime.strptime(x, "%Y-%m-%d"), df.index))
     # 获取每天的最高价
@@ -97,13 +98,14 @@ def timeseries_evaluation_metrics_func(y_true, y_pred):
 if __name__ == '__main__':
     # pro = ts.pro_api(TS_TOKEN)
     # cons = ts.get_apis()
-    # df = ts.bar('000300', conn=cons, asset='INDEX', start_date='2010-01-01', end_date='')
+    # # df = ts.bar('000300', conn=cons, asset='INDEX', start_date='2010-01-01', end_date='')
+    # df = ts.bar(csv_name, conn=cons, asset='E', start_date='2010-01-01', end_date='')
     # df = df.dropna()
     # df = df.iloc[::-1]
-    # df.to_csv('sh000300.csv')
+    # df.to_csv(csv_name + ".csv")
     da = []
     r2 = []
-    for k in range(50):
+    for k in range(1):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         pd.plotting.register_matplotlib_converters()
@@ -175,12 +177,12 @@ if __name__ == '__main__':
         # plt.show()
 
         # plt.clf()
-        # plt.plot(df_index[train_end:-500], df_all[train_end:-500], label='real-data')
-        # plt.plot(df_index[train_end:-500], generate_data_test[train_end:-500], label='generate_test')
-        # plt.legend()
-        # plt.show()
+        plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
+        plt.plot(df_index[train_end:], generate_data_test[train_end:], label='generate_test')
+        plt.legend()
+        plt.show()
         logger.info("----------------------------------------------------------------------")
-        _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:-500], generate_data_test[train_end:-500])
+        _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:], generate_data_test[train_end:])
 
         plt.clf()
         plt.plot(range(EPOCH), loss_list, label='loss')
