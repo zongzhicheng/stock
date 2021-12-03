@@ -22,7 +22,11 @@ def get_kline_history_data(code, ktype):
     else:
         js = json.loads(lines.decode('utf-8'))
         cols = ['date', 'open', 'high', 'close', 'low', 'volume', 'price_change', 'p_change',
-                'ma5', 'ma10', 'ma20', 'v_ma5', 'v_ma10', 'v_ma20']
+                'ma5', 'ma10', 'ma20', 'vol_ma5', 'vol_ma10', 'vol_ma20', 'turnover_rate']
+        if len(js['record'][0]) == 14:
+            # 长度为14的 没有turnover_rate字段
+            cols = ['date', 'open', 'high', 'close', 'low', 'volume', 'price_change', 'p_change',
+                    'ma5', 'ma10', 'ma20', 'vol_ma5', 'vol_ma10', 'vol_ma20']
         df = pd.DataFrame(js['record'], columns=cols)
         df = df.applymap(lambda x: x.replace(u',', u''))
         df[df == ''] = 0
