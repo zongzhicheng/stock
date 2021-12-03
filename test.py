@@ -18,10 +18,10 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, 
 n = 5
 LR = 0.0002
 EPOCH = 200
-batch_size = 100
+batch_size = 40
 hidden_size = 128
 train_end = -300
-csv_name = "000300"
+csv_name = "600519"
 
 
 class RNN(nn.Module):
