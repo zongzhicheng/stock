@@ -1,3 +1,8 @@
+# _*_ coding: utf-8 _*_
+"""
+@Author: Zongzc
+@Describe:
+"""
 from conf import *
 from urllib.request import urlopen, Request
 import json
@@ -29,4 +34,4 @@ def get_kline_history_data(code, ktype):
 
 
 if __name__ == '__main__':
-    print(get_kline_history_data('sh000001', ktype='D'))
+    print(get_kline_history_data('sh600519', ktype='D'))

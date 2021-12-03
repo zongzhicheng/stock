@@ -1,3 +1,8 @@
+# _*_ coding: utf-8 _*_
+"""
+@Author: Zongzc
+@Describe:
+"""
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from qt.thread import *
 from script.general import *

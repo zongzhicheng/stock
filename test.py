@@ -1,3 +1,8 @@
+# _*_ coding: utf-8 _*_
+"""
+@Author: Zongzc
+@Describe:
+"""
 import datetime
 import tushare as ts
 from conf import *
@@ -10,8 +15,8 @@ from torch.utils.data import Dataset, DataLoader
 from loguru import logger
 from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error, mean_absolute_error, r2_score
 
-n = 14
-LR = 0.0005
+n = 5
+LR = 0.0002
 EPOCH = 200
 batch_size = 100
 hidden_size = 128
@@ -96,16 +101,22 @@ def timeseries_evaluation_metrics_func(y_true, y_pred):
 
 
 if __name__ == '__main__':
-    # pro = ts.pro_api(TS_TOKEN)
-    # cons = ts.get_apis()
-    # # df = ts.bar('000300', conn=cons, asset='INDEX', start_date='2010-01-01', end_date='')
-    # df = ts.bar(csv_name, conn=cons, asset='E', start_date='2010-01-01', end_date='')
-    # df = df.dropna()
-    # df = df.iloc[::-1]
-    # df.to_csv(csv_name + ".csv")
+    """
+    数据获取接口
+    
+    pro = ts.pro_api(TS_TOKEN)
+    cons = ts.get_apis()
+    # df = ts.bar('000300', conn=cons, asset='INDEX', start_date='2010-01-01', end_date='')
+    df = ts.bar(csv_name, conn=cons, asset='E', start_date='2010-01-01', end_date='')
+    df = df.dropna()
+    df = df.iloc[::-1]
+    df.to_csv(csv_name + ".csv")
+    
+    """
+
     da = []
     r2 = []
-    for k in range(50):
+    for k in range(1):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         pd.plotting.register_matplotlib_converters()
@@ -177,17 +188,17 @@ if __name__ == '__main__':
         # plt.show()
 
         # plt.clf()
-        # plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
-        # plt.plot(df_index[train_end:], generate_data_test[train_end:], label='generate_test')
-        # plt.legend()
-        # plt.show()
+        plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
+        plt.plot(df_index[train_end:], generate_data_test[train_end:], label='generate_test')
+        plt.legend()
+        plt.show()
         logger.info("----------------------------------------------------------------------")
         _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:], generate_data_test[train_end:])
 
         # plt.clf()
-        # plt.plot(range(EPOCH), loss_list, label='loss')
-        # plt.legend()
-        # plt.show()
+        plt.plot(range(EPOCH), loss_list, label='loss')
+        plt.legend()
+        plt.show()
         da.append(_da)
         r2.append(_r2)
 

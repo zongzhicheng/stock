@@ -1,7 +1,7 @@
 ## 测试表格
 
 ## SH.000300
-
+#### 预测范围：[-600:-500]
 - 10次取平均
 
 |  id  |  LR  |  n   |batch_size|hidden_size| num_layers | epoch |    r2    |   DA   |           conclusion           |
@@ -48,6 +48,7 @@
 
 ## SH.600519
 - 50次取平均
+#### 预测范围：[-300:]
 
 |  id  |  LR  |  n   |batch_size|hidden_size| num_layers | epoch |    r2    |   DA   |           conclusion           |
 |:----:|:----:|:----:|  :----:  |   :----:  |   :----:   |:----: |  :----:  | :----: |             :----:             |

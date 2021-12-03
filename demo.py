@@ -1,3 +1,8 @@
+# _*_ coding: utf-8 _*_
+"""
+@Author: Zongzc
+@Describe: qt线程小demo
+"""
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 import sys

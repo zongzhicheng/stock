@@ -1,6 +1,14 @@
+# _*_ coding: utf-8 _*_
+"""
+@Author: Zongzc
+@Describe: 线程类
+"""
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from script.real_time import *
+from loguru import logger
+from script.general import compare_time
+import time
 
 
 class Thread1(QThread):
@@ -14,6 +22,7 @@ class Thread1(QThread):
         self.code = code
         self.isCancel = False
         self.mutex = QMutex()
+        self.time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     def cancel(self):
         self.isCancel = True
@@ -28,13 +37,16 @@ class Thread1(QThread):
             if not result:
                 self.errorOut.emit("股票代码格式有误（参考：sh000001）")
                 break
-            print(result)
-            for i in range(len(result)):
-                item = QTableWidgetItem(str(result[i]))
-                var = (i - 1, 1, item)
-                # 发射信号
-                self.sinOut.emit(var)
-            self.msleep(1500)
+            logger.info(result)
+            time = result[6]
+            if compare_time(time, self.time):
+                self.time = time
+                for i in range(len(result)):
+                    item = QTableWidgetItem(str(result[i]))
+                    var = (i - 1, 1, item)
+                    # 发射信号
+                    self.sinOut.emit(var)
+            self.msleep(1000)
             # 线程锁off
             self.mutex.unlock()
 
