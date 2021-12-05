@@ -173,7 +173,7 @@ if __name__ == '__main__':
         df_all_normal_tensor = torch.Tensor(df_all_normal)
         for i in range(n, len(df_all)):
             x = df_all_normal_tensor[i - n:i].to(device)
-            # rnn的输入必须是3维，故需添加两个1维的维度，最后成为[1,1,input_size]
+            # rnn的输入必须是3维，故需添加两个1维的维度，最后成为[1,1,iaanput_size]
             x = torch.unsqueeze(torch.unsqueeze(x, dim=0), dim=0)
 
             y = rnn(x).to(device)

@@ -38,4 +38,8 @@ def get_kline_history_data(code, ktype):
 
 
 if __name__ == '__main__':
-    print(get_kline_history_data('sh600519', ktype='D'))
+    code = 'sh600519'
+    ktype = 'D'
+    df = get_kline_history_data(code, ktype=ktype)
+    df.to_csv('../doc/{}_{}.csv'.format(code, ktype))
+    print(df)
