@@ -172,6 +172,7 @@ if __name__ == '__main__':
         df_all_normal = (df_all - df_numpy_mean) / df_numpy_std
         df_all_normal_tensor = torch.Tensor(df_all_normal)
         for i in range(n, len(df_all)):
+            # 类似于range
             x = df_all_normal_tensor[i - n:i].to(device)
             # rnn的输入必须是3维，故需添加两个1维的维度，最后成为[1,1,iaanput_size]
             x = torch.unsqueeze(torch.unsqueeze(x, dim=0), dim=0)
@@ -181,6 +182,14 @@ if __name__ == '__main__':
                 generate_data_train.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
             else:
                 generate_data_test.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
+
+        test = []
+        for i in range(len(df_all), len(df_all) + 4 * n):
+            x = df_all_normal_tensor[i - n:i].to(device)
+            x = torch.unsqueeze(torch.unsqueeze(x, dim=0), dim=0)
+            y = rnn(x).to(device)
+            df_all_normal_tensor = torch.Tensor(np.append(df_all_normal_tensor, y.detach().cpu().numpy()))
+            test.append(torch.squeeze(y).detach().cpu().numpy() * df_numpy_std + df_numpy_mean)
         # plt.plot(df_index[n:train_end], generate_data_train, label='generate_train')
         # plt.plot(df_index[train_end:], generate_data_test, label='generate_test')
         # plt.plot(df_index[train_end:], df_all[train_end:], label='real-data')
@@ -195,10 +204,26 @@ if __name__ == '__main__':
         logger.info("----------------------------------------------------------------------")
         _da, _r2 = timeseries_evaluation_metrics_func(df_all[train_end:], generate_data_test[train_end:])
 
-        # plt.clf()
+        plt.clf()
         plt.plot(range(EPOCH), loss_list, label='loss')
         plt.legend()
         plt.show()
+        da.append(_da)
+        r2.append(_r2)
+
+        plt.clf()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        plot_x = np.arange(1, 4 * n + 1).astype(dtype=str)
+        plt.plot(plot_x, test, label='future')
+        # 坐标往上挪0.1 便于显示
+        datadotxy = tuple(zip(plot_x.tolist(), [i + 0.1 for i in test]))
+        for dotxy in datadotxy:
+            # 实际显示值要减回来
+            ax.annotate(str(round(dotxy[1] - 0.1, 2)), xy=dotxy)
+        plt.legend()
+        plt.show()
+
         da.append(_da)
         r2.append(_r2)
 
