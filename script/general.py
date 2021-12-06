@@ -4,6 +4,7 @@
 @Describe: 一些基础的公共方法
 """
 import datetime
+import time
 
 E000001 = "script.real_time.alert_real_time_single_field return fieldError"
 
@@ -42,9 +43,27 @@ def compare_time(t1, t2):
         format_pattern = '%Y-%m-%d %H:%M:%S'
         dt1 = datetime.datetime.strptime(t1, format_pattern)
         dt2 = datetime.datetime.strptime(t2, format_pattern)
-        if (dt1 - dt2).seconds > 0:
+        if (dt1 - dt2).days > 0 and (dt1 - dt2).seconds > 0:
             return True
         else:
             return False
     else:
         return False
+
+
+def judge_time_is_tradable():
+    """
+    判断当前时间是否在交易时间
+    交易时间为 9:30-11:30、13:00-15:00
+    :param t1:
+    :return:
+    """
+    time_now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    if "13:00:00" <= time_now <= "15:00:00" or "09:30:00" <= time_now <= "11:30:00":
+        return True
+    else:
+        return False
+
+
+if __name__ == '__main__':
+    print(judge_time_is_tradable())

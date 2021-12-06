@@ -7,7 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from script.real_time import *
 from loguru import logger
-from script.general import compare_time
+from script.general import compare_time, judge_time_is_tradable
 import time
 
 
@@ -39,7 +39,7 @@ class Thread1(QThread):
                 break
             logger.info(result)
             time = result[6]
-            if compare_time(time, self.time):
+            if compare_time(time, self.time) or not judge_time_is_tradable():
                 self.time = time
                 for i in range(len(result)):
                     item = QTableWidgetItem(str(result[i]))
@@ -81,7 +81,7 @@ class Thread2(QThread):
             if result == "filedError":
                 self.errorOut.emit("请联系管理员（错误代码E000001）")
                 break
-            print(result)
+            # print(result)
             if result:
                 self.sinOut.emit()
                 self.msleep(1500)
