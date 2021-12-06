@@ -122,7 +122,7 @@ if __name__ == '__main__':
         pd.plotting.register_matplotlib_converters()
 
         # 获取训练数据、原始数据、索引等信息
-        df, df_all, df_index = readData('high', n=n, train_end=train_end)
+        df, df_all, df_index = readData('close', n=n, train_end=train_end)
 
         # 可视化原最高价数据
         df_all = np.array(df_all.tolist())
