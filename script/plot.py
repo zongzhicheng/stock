@@ -33,11 +33,12 @@ def daily_kline_plot(df, start_time, end_time):
 
     # x轴修改
     ax = plt.gca()
-    # 设置主刻度定位器为周定位器（每周一显示主刻度文本）
-    # TODO 横坐标去掉周末
+    # # 设置主刻度定位器为周定位器（每周一显示主刻度文本）
+    # # TODO 横坐标去掉周末
     ax.xaxis.set_major_locator(matplotlib.dates.WeekdayLocator(byweekday=matplotlib.dates.MO))
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%Y-%m-%d'))
     ax.xaxis.set_minor_locator(matplotlib.dates.DayLocator())
+
 
     colors_bool = close >= open
     colors = np.zeros(colors_bool.size, dtype="U5")
